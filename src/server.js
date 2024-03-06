@@ -21,4 +21,14 @@ const handleListen = () => console.log('Listening on http://localhost:3000');
 const server = http.createServer(app);
 const wss = new ws.WebSocketServer({ server });
 
+wss.on('connection', (socket) => { // from fe, 연결된 브라우저
+    // console.log(socket);
+
+    console.log('서버 연결 시작');
+    socket.on('message', message => console.log(message.toString('utf-8')));
+    socket.on('close', ()=> console.log('서버 연결 종료'));
+
+    // socket.send('hello!!!');
+})
+
 server.listen(3000, handleListen);
