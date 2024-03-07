@@ -22,13 +22,15 @@ const server = http.createServer(app);
 const wss = new ws.WebSocketServer({ server });
 
 wss.on('connection', (socket) => { // from fe, 연결된 브라우저
-    // console.log(socket);
-
     console.log('서버 연결 시작');
+
+    // fe로부터 받아온 message 감지
     socket.on('message', message => console.log(message.toString('utf-8')));
+
+    // be 소켓 연결 종료
     socket.on('close', ()=> console.log('서버 연결 종료'));
 
-    // socket.send('hello!!!');
+    // socket.send('hello!!!');s
 })
 
 server.listen(3000, handleListen);
