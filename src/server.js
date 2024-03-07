@@ -48,8 +48,10 @@ wss.on('connection', (socket) => { // from fe, 연결된 브라우저
         switch(msgType){
             case 'message': {
                 sockets.forEach(aSocket => {
-                    aSocket.send(`${socket['nickname']}: ${msgPayload}`)
+                    const nick = aSocket === socket ? 'You' : socket['nickname'];
+                    aSocket.send(`${nick}: ${msgPayload}`);
                 });
+                
                 break;
             }
             case 'nickname': {
