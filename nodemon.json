@@ -1,4 +1,7 @@
 {
-    "ignore": ["src/public/*"],
-    "exec": "babel-node src/server.js"
+    "ignore": [
+        "websockets/src/public/*",
+        "socket-io/src/public/*"
+    ],
+    "exec": "babel-node socket-io/src/server.js"
 }
