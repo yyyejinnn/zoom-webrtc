@@ -15,7 +15,17 @@ app.get('/', (_, res) => res.render('home'));
 const server = http.createServer(app);
 const ioServer = socketIO(server);
 
+function publicRooms(){
+    const { sids, rooms } = ioServer.sockets.adapter;
+
+    // console.log(sids);
+    // console.log(rooms);
+
+    return [...rooms.keys()].filter(room => !sids.has(room));
+}
+
 ioServer.on('connection', socket => {
+    ioServer.sockets.emit('room_change', publicRooms());
     socket['nickname'] = 'Anon';
 
     /**
@@ -27,7 +37,9 @@ ioServer.on('connection', socket => {
         socket.join(roomName);
         socket['nickname'] = nickName;
         fn();
+        
         socket.to(roomName).emit('welcome', socket['nickname']);    // 나를 제외한 방 안의 모든 이에게 이벤트 적용
+        ioServer.sockets.emit('room_change', publicRooms());
     })
 
     socket.on('save_nickname', (nickname) => socket['nickname'] = nickname);
@@ -45,6 +57,8 @@ ioServer.on('connection', socket => {
          */
         socket.rooms.forEach(room => socket.to(room).emit('bye', socket['nickname']));
     })
+
+    socket.on('disconnect', () => ioServer.sockets.emit('room_change', publicRooms()));
 });
 
 const handleListen = () => console.log('Listening on http://localhost:3000');

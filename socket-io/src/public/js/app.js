@@ -34,8 +34,8 @@ function showRoom(){
     const h3 = room.querySelector('h3');
     h3.innerText = `Room: ${roomName}`;
 
-    const h4 = room.querySelector('h4');
-    h4.innerText = `NickName: ${nickName}`;
+    const h5 = room.querySelector('h5');
+    h5.innerText = `NickName: ${nickName}`;
 
     const msgForm = room.querySelector('#msg');
     msgForm.addEventListener('submit', handleMessageSubmit);
@@ -85,3 +85,18 @@ socket.on('bye', (nickname) => {
 })
 
 socket.on('get_sending_message', (msg, nickname) => addMessage(`${nickname}: ${msg}`)); // (message) => addMessage(message)와 동일 -> 인수 생략 가능
+
+socket.on('room_change', (rooms) => {
+    const roomList = welcome.querySelector('ul');
+    roomList.innerHTML = '';
+
+    if (rooms.lenth === 0){
+        return;
+    }
+
+    rooms.forEach(room => {
+        const li = document.createElement('li');
+        li.innerText = room;
+        roomList.append(li);
+    })
+});
