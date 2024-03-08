@@ -8,11 +8,37 @@ room.hidden = true;
 
 let roomName;
 
+function handleMessageSubmit(event){
+    event.preventDefault();
+    const input = room.querySelector('#msg input');
+
+    const msg = input.value;
+    socket.emit('send_message', msg, roomName, () => addMessage(`You: ${msg}`));
+    input.value = '';
+}
+
+function handleNicknameSubmit(event){
+    event.preventDefault();
+    const input = room.querySelector('#nick input');
+
+    const nickname = input.value;
+    socket.emit('save_nickname', nickname);
+    input.value = '';
+
+}
+
 function showRoom(){
     welcome.hidden = true;
     room.hidden = false;
     const h3 = room.querySelector('h3');
     h3.innerText = `Room ${roomName}`;
+
+    const msgForm = room.querySelector('#msg');
+    msgForm.addEventListener('submit', handleMessageSubmit);
+
+    const nickForm = room.querySelector('#nick');
+    nickForm.addEventListener('submit', handleNicknameSubmit);
+
 }
 
 function handleRoomSubmit(event){
@@ -45,6 +71,12 @@ function addMessage(msg){
     ul.appendChild(li);
 }
 
-socket.on('welcome', () => {
-    addMessage('Someone joined!');
+socket.on('welcome', (nickname) => {
+    addMessage(`${nickname} joined!`);
 })
+
+socket.on('bye', (nickname) => {
+    addMessage(`${nickname} left!`);
+})
+
+socket.on('get_sending_message', (msg, nickname) => addMessage(`${nickname}: ${msg}`)); // (message) => addMessage(message)와 동일 -> 인수 생략 가능
