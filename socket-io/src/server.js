@@ -23,8 +23,9 @@ ioServer.on('connection', socket => {
      * 여기서 room이란 채팅에 국한되지않음
      * -> 배민 주문을 하면 배달원과 나 사이의 'room'이 그룹핑 되는 것
      */
-    socket.on('enter_room', (roomName, fn) => {
+    socket.on('enter_room', (roomName, nickName, fn) => {
         socket.join(roomName);
+        socket['nickname'] = nickName;
         fn();
         socket.to(roomName).emit('welcome', socket['nickname']);    // 나를 제외한 방 안의 모든 이에게 이벤트 적용
     })

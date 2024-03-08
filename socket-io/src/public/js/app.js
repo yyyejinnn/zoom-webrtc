@@ -7,6 +7,7 @@ const room = document.getElementById('room');
 room.hidden = true;
 
 let roomName;
+let nickName;
 
 function handleMessageSubmit(event){
     event.preventDefault();
@@ -17,33 +18,34 @@ function handleMessageSubmit(event){
     input.value = '';
 }
 
-function handleNicknameSubmit(event){
-    event.preventDefault();
-    const input = room.querySelector('#nick input');
+// function handleNicknameSubmit(event){
+//     event.preventDefault();
+//     const input = room.querySelector('#nick input');
 
-    const nickname = input.value;
-    socket.emit('save_nickname', nickname);
-    input.value = '';
+//     const nickname = input.value;
+//     socket.emit('save_nickname', nickname);
+//     input.value = '';
 
-}
+// }
 
 function showRoom(){
     welcome.hidden = true;
     room.hidden = false;
     const h3 = room.querySelector('h3');
-    h3.innerText = `Room ${roomName}`;
+    h3.innerText = `Room: ${roomName}`;
+
+    const h4 = room.querySelector('h4');
+    h4.innerText = `NickName: ${nickName}`;
 
     const msgForm = room.querySelector('#msg');
     msgForm.addEventListener('submit', handleMessageSubmit);
-
-    const nickForm = room.querySelector('#nick');
-    nickForm.addEventListener('submit', handleNicknameSubmit);
-
 }
 
 function handleRoomSubmit(event){
     event.preventDefault();
-    const input = form.querySelector('input');
+
+    const nickNameInput = document.getElementById('nickname');
+    const roomNameInput = document.getElementById('roomname');
 
     /** socket.emit(): https://socket.io/docs/v4/server-api/#serveremiteventname-args
      * server.js socket.on('enter_room', fn)
@@ -55,10 +57,13 @@ function handleRoomSubmit(event){
      * 
      */
 
-    roomName = input.value;
+    roomName = roomNameInput.value;
+    nickName = nickNameInput.value;
 
-    socket.emit('enter_room', roomName, showRoom);
-    input.value = '';
+    socket.emit('enter_room', roomName, nickName, showRoom);
+
+    roomNameInput.value = '';
+    nickNameInput.value = '';
 }
 
 form.addEventListener('submit', handleRoomSubmit);
