@@ -28,11 +28,19 @@ function handleMessageSubmit(event){
 
 // }
 
+function changeH3CountRoom(count){
+    const h3 = room.querySelector('h3');
+
+    const base =  `Room: ${roomName}`;
+
+    h3.innerText = count ? base + ` (${count})` : base;
+}
+
 function showRoom(){
     welcome.hidden = true;
     room.hidden = false;
-    const h3 = room.querySelector('h3');
-    h3.innerText = `Room: ${roomName}`;
+
+    changeH3CountRoom();
 
     const h5 = room.querySelector('h5');
     h5.innerText = `NickName: ${nickName}`;
@@ -76,11 +84,13 @@ function addMessage(msg){
     ul.appendChild(li);
 }
 
-socket.on('welcome', (nickname) => {
+socket.on('welcome', (nickname, count) => {
+    changeH3CountRoom(count);
     addMessage(`${nickname} joined!`);
 })
 
-socket.on('bye', (nickname) => {
+socket.on('bye', (nickname, count) => {
+    changeH3CountRoom(count);
     addMessage(`${nickname} left!`);
 })
 
