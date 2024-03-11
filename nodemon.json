@@ -1,7 +1,8 @@
 {
     "ignore": [
         "websockets/src/public/*",
-        "socket-io/src/public/*"
+        "socket-io/src/public/*",
+        "web-rtc/src/public/*"
     ],
-    "exec": "babel-node socket-io/src/server.js"
+    "exec": "babel-node web-rtc/src/server.js"
 }
