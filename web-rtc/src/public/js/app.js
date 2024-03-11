@@ -159,13 +159,32 @@ socket.on('answer', (answer) => {
     myPeerConnection.setRemoteDescription(answer);
 })
 
+socket.on('ice', (ice) => {
+    // recieve candidate
+    myPeerConnection.addIceCandidate(ice);
+})
+
 /**
  * RTC code
  */
 
+function handleIce(iceData){
+    // send candidate
+    socket.emit('ice', iceData.candidate, roomName);
+}
+
+function handleAddStream(data){
+    // get an event from my peer
+
+    const peerFace = document.getElementById('peerFace');
+    peerFace.srcObject = data.streams[0];
+}
+
 function makeConnection(){
     // 1-1. p2p connection 생성
     myPeerConnection = new RTCPeerConnection();
+    myPeerConnection.addEventListener('icecandidate', handleIce);
+    myPeerConnection.addEventListener('track', handleAddStream);
 
     // 1-2. stream p2p 연결
     myStream
