@@ -1,4 +1,4 @@
-// const socket = io();
+const socket = io();
 
 const myFace = document.getElementById('myFace');
 const muteBtn = document.getElementById('mute');
@@ -8,6 +8,8 @@ const camerasSelect = document.getElementById('cameras');
 let myStream;
 let muted = false;
 let camereOff = false;
+let roomName;
+let myPeerConnection;
 
 async function getCameras(){
     try{
@@ -58,8 +60,6 @@ async function getMedia(deviceId){
     }
 }
 
-getMedia();
-
 function handleMuteClick(){
     // 실제 audio track 변경
     myStream
@@ -100,3 +100,65 @@ async function handleCameraChange(){
 muteBtn.addEventListener('click', handleMuteClick);
 cameraBtn.addEventListener('click', handleCameraClick);
 camerasSelect.addEventListener('input', handleCameraChange);
+
+
+/**
+ * Welcome Form (join a room)
+ */
+
+const welcome = document.getElementById('welcome');
+const call = document.getElementById('call');
+call.hidden = true;
+
+const welcomeForm = welcome.querySelector('form');
+
+async function startMedia(){
+    welcome.hidden = true;
+    call.hidden = false;
+    await getMedia();
+    makeConnection();
+}
+
+async function handleWelcomeSubmit(event){
+    event.preventDefault();
+    const input = welcomeForm.querySelector('input');
+    socket.emit('join_room', input.value, startMedia);
+    roomName = input.value;
+    input.value = '';
+}
+
+welcomeForm.addEventListener('submit', handleWelcomeSubmit);
+
+
+/**
+ * Socket Code
+ */
+
+// peer A
+socket.on('welcome', async () => {
+    const offer = await myPeerConnection.createOffer();
+    myPeerConnection.setLocalDescription(offer);
+
+    console.log('Peer-A sent the offer to Peer-B!');
+    socket.emit('offer', offer, roomName);
+})
+
+// peer B
+socket.on('offer', (offer) => {
+    console.log(offer);
+})
+
+/**
+ * RTC code
+ */
+
+function makeConnection(){
+    // 1-1. p2p connection 생성
+    myPeerConnection = new RTCPeerConnection();
+
+    // 1-2. stream p2p 연결
+    myStream
+        .getTracks()
+        .forEach(track => myPeerConnection.addTrack(track, myStream));
+    
+}

@@ -13,7 +13,19 @@ app.get('/', (_, res) => res.render('home'));
 
 
 const server = http.createServer(app);
+const ioServer = socketIO(server);
 
+ioServer.on('connection', socket => {
+    socket.on('join_room', (roomName, fn) => {
+        socket.join(roomName);
+        fn();
+        socket.to(roomName).emit('welcome');
+    });
+
+    socket.on('offer', (offer, roomName) => {
+        socket.to(roomName).emit('offer', offer);
+    });
+})
 
 const handleListen = () => console.log('Listening on http://localhost:3000');
 server.listen(3000, handleListen);
