@@ -10,6 +10,7 @@ let muted = false;
 let camereOff = false;
 let roomName;
 let myPeerConnection;
+let myDataChannel;
 
 async function getCameras(){
     try{
@@ -149,11 +150,41 @@ welcomeForm.addEventListener('submit', handleWelcomeSubmit);
 
 
 /**
+ * Chat Form - Data Channel
+ */
+const chat = document.getElementById('chat');
+const chatForm = chat.querySelector('form');
+
+async function handleChatSubmit(event){
+    event.preventDefault();
+    const input = chatForm.querySelector('input');
+
+    myDataChannel.send(input.value);
+    sendDataChannelMessage(`You: ${input.value}`);
+
+    input.value = '';
+}
+
+chatForm.addEventListener('submit', handleChatSubmit);
+
+function sendDataChannelMessage(message){
+    const ul = chat.querySelector('ul');
+    const li = document.createElement('li');
+    li.innerText = message;
+    ul.appendChild(li);
+}
+
+/**
  * Socket Code
  */
 
 // peer A
 socket.on('welcome', async () => {
+    // data channel - offer
+    myDataChannel = myPeerConnection.createDataChannel('chat');
+    myDataChannel.addEventListener('message', (event) => sendDataChannelMessage(event.data));
+
+    // p2p
     const offer = await myPeerConnection.createOffer();
     myPeerConnection.setLocalDescription(offer);
 
@@ -163,6 +194,13 @@ socket.on('welcome', async () => {
 
 // peer B
 socket.on('offer', async (offer) => {
+    // data channel - answer
+    myPeerConnection.addEventListener('datachannel', (event) => {
+        myDataChannel = event.channel;
+        myDataChannel.addEventListener('message', (event) => sendDataChannelMessage(event.data));
+    });
+
+    // p2p
     myPeerConnection.setRemoteDescription(offer);
 
     const answer = await myPeerConnection.createAnswer();
