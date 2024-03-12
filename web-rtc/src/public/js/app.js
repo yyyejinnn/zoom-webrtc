@@ -94,7 +94,22 @@ function handleCameraClick(){
 
 async function handleCameraChange(){
     const deviceId = camerasSelect.value;
-    await getMedia(deviceId);
+    await getMedia(deviceId);   // 새로운 생성된 stream 반영 (myStream)
+    
+    /**
+     * sender로 peer track 업데이트하기
+     */
+    if(myPeerConnection){
+        // 변경된 나의 track 가져오기
+        const videoTrack = myStream.getVideoTracks()[0];
+
+        // peer stream 변경
+        const videoSender = myPeerConnection
+            .getSenders()
+            .find(sender => sender.track.kind === 'video');
+        
+        videoSender.replaceTrack(videoTrack);
+    }
 }
 
 muteBtn.addEventListener('click', handleMuteClick);
@@ -182,7 +197,20 @@ function handleAddStream(data){
 
 function makeConnection(){
     // 1-1. p2p connection 생성
-    myPeerConnection = new RTCPeerConnection();
+    myPeerConnection = new RTCPeerConnection({
+        // STUN server
+        iceServers: [
+            {
+                urls: [
+                    "stun:stun.l.google.com:19302",
+                    "stun:stun1.l.google.com:19302",
+                    "stun:stun2.l.google.com:19302",
+                    "stun:stun3.l.google.com:19302",
+                    "stun:stun4.l.google.com:19302",
+                    ],
+            }
+        ]
+    });
     myPeerConnection.addEventListener('icecandidate', handleIce);
     myPeerConnection.addEventListener('track', handleAddStream);
 
